@@ -18,6 +18,7 @@
 
 # Jupyter
 .ipynb_checkpoints/
+.json 
 
 # Python
 __pycache__/
