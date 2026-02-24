@@ -1,0 +1,27 @@
+# do not commit and ignore dataset files here: 
+
+# Ignore CSV data files
+*.csv
+*.tsv
+*.xlsx
+*.parquet
+
+# Archives
+*.zip
+*.tar
+*.gz
+
+# Ignore macOS system files
+.DS_Store
+**/.DS_Store
+
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
