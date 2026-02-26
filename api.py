@@ -1,4 +1,4 @@
-
+% pip install Flask
 from flask import Flask, request, jsonify, send_file, render_template
 import re
 from io import BytesIO
