@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 import matplotlib.pyplot as plt
 import pandas as pd
-import pickle 
+import pickle
 import base64
 
 STOPWORDS = set(stopwords.words("english"))
@@ -58,7 +58,7 @@ def predict():
             text_input  = request.json["text"]
             predicted_sentiment = single_prediction(predictor, scaler, cv, text_input)
 
-            return jsonify({"prediction":prediction_sentiment})
+            return jsonify({"prediction":predicted_sentiment})
         
 
     except Exception as e: 
