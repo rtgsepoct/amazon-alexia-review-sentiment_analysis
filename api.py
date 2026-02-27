@@ -1,147 +1,142 @@
 from flask import Flask, request, jsonify, send_file, render_template
+from flask_cors import CORS
 import re
 from io import BytesIO
 
-# nltk.download import ()"stopwords")
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
 import base64
 
+app = Flask(__name__, template_folder="templates", static_folder="static")
+CORS(app)  # allow requests from http://localhost:5500 etc.
+
 STOPWORDS = set(stopwords.words("english"))
+stemmer = PorterStemmer()
 
-app = Flask(__name__)
+# Load artifacts once (not every request)
+predictor = pickle.load(open("./model_xgb.pkl", "rb"))
+scaler = pickle.load(open("./scaler.pkl", "rb"))
+cv = pickle.load(open("./countVectorizer.pkl", "rb"))
 
-@app.route("./test", method=["GET"])
+
+@app.route("/test", methods=["GET"])
 def test():
     return "Test request received successfully. Service is running"
 
 
-@app.route("/", methods = ["GET", "POST"])
+@app.route("/", methods=["GET"])
 def home():
     return render_template("landing.html")
 
+
 @app.route("/predict", methods=["POST"])
 def predict():
-    # select the predictor to be loaded from Models: 
-    predictor  = pickle.load(open(r"./model_xgb.pkl", "rb"))
-    scaler = pickle.load(open(r"./scaler.pkl", 'rb'))
-    cv = pickle.load(open(r"./countVectorizer.pkl", "rb"))
     try:
-        #check if the request contains a file (for bulk predictions) or text input
-        if "file" in request.files:
-            #Bulk prediction from CSV file
-            file = request.files['file']
+        # Bulk prediction from CSV file
+        if "file" in request.files and request.files["file"].filename != "":
+            file = request.files["file"]
             data = pd.read_csv(file)
 
-            predictions, graph = bulk_prediction(predictor, scaler, cv, data)
+            predictions_csv, graph = bulk_prediction(predictor, scaler, cv, data)
 
             response = send_file(
-                predictions, 
+                predictions_csv,
                 mimetype="text/csv",
                 as_attachment=True,
-                download_name = "Predictions.csv",
+                download_name="Predictions.csv",
             )
 
-            response.header["X-Graph-Exists"] = "true"
-
+            # Custom headers for graph
+            response.headers["X-Graph-Exists"] = "true"
             response.headers["X-Graph-Data"] = base64.b64encode(
                 graph.getbuffer()
             ).decode("ascii")
 
             return response
-        
-        elif "text" in request.json:
-            # Single string predictoin 
-            text_input  = request.json["text"]
+
+        # Single text prediction (JSON)
+        if request.is_json:
+            payload = request.get_json(silent=True) or {}
+            text_input = payload.get("text", "")
+            if not text_input.strip():
+                return jsonify({"error": "Missing 'text' field"}), 400
+
             predicted_sentiment = single_prediction(predictor, scaler, cv, text_input)
+            return jsonify({"prediction": predicted_sentiment})
 
-            return jsonify({"prediction":predicted_sentiment})
-        
+        return jsonify({"error": "Send either a CSV file (multipart/form-data) or JSON {'text': '...'}"}), 400
 
-    except Exception as e: 
-        return jsonify({"error": str(e)})
-    
-
-# Single Prediction: 
-def single_prediction(predictor, scaler, cv, text_input):
-    corpus = []
-    stemmer = PorterStemmer()
-    review = re.sub("[^a-zA-Z]", " ", text_input)
-    review = review.lower().split()
-    review = [stemmer.stem(word for word in review if not word in STOPWORDS)]
-    review = " ".join(review)
-    corpus.append(review)
-    X_prediction = cv.transform(corpus).toarray()
-    X_prediction_scl = scaler.tranform(X_prediction)
-    y_predictions = predictor.predict_proba(X_prediction_scl)
-    y_predictions = y_predictions.argmax(axis=1)[0] 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-    return "Positive Sentiment" if y_predictions ==1 else  "Negative Sentiment"
+def clean_text(text: str) -> str:
+    review = re.sub(r"[^a-zA-Z]", " ", str(text))
+    words = review.lower().split()
+    words = [stemmer.stem(word) for word in words if word not in STOPWORDS]
+    return " ".join(words)
 
 
+def single_prediction(predictor, scaler, cv, text_input: str) -> str:
+    corpus = [clean_text(text_input)]
+    X = cv.transform(corpus).toarray()
+    X_scl = scaler.transform(X)
+    proba = predictor.predict_proba(X_scl)
+    pred_class = int(proba.argmax(axis=1)[0])
+    return "Positive Sentiment" if pred_class == 1 else "Negative Sentiment"
 
-# BULK Prediction 
-def bulk_prediction(predictor, scaler, cv, data):
-    corpus = []
-    stemmer = PorterStemmer()
-    for i in range(0, data.shape[0]):
-        review = re.sub("[^a-zA-Z]", " ", data.iloc[i]["Sentence"])
-        review = review.lower().split()
-        review = [stemmer.stem(word) for word in review if not word in STOPWORDS]
-        review = " ".join(review)
-        corpus.append(review)
 
-    X_prediction = cv.transform(corpus).toarray()
-    X_prediction_scl = scaler.transform(X_prediction)
-    y_predictions = predictor.predict_proba(X_prediction_scl)
-    y_predictions = y_predictions.argmax(axis=1)
-    y_predictions = list(map(sentiment_mapping, y_predictions))
+def bulk_prediction(predictor, scaler, cv, data: pd.DataFrame):
+    if "Sentence" not in data.columns:
+        raise ValueError("CSV must contain a 'Sentence' column.")
 
-    data["Predicted sentiment"] = y_predictions
+    corpus = [clean_text(s) for s in data["Sentence"].astype(str).tolist()]
+    X = cv.transform(corpus).toarray()
+    X_scl = scaler.transform(X)
+
+    proba = predictor.predict_proba(X_scl)
+    y = proba.argmax(axis=1)
+    y = [sentiment_mapping(int(v)) for v in y]
+
+    data = data.copy()
+    data["Predicted sentiment"] = y
+
     predictions_csv = BytesIO()
-
-    data.to_csv(predictions_csv, index=False) 
+    data.to_csv(predictions_csv, index=False)
     predictions_csv.seek(0)
 
     graph = get_distribution_graph(data)
     return predictions_csv, graph
 
 
-def get_distribution_graph(data) :
+def get_distribution_graph(data: pd.DataFrame) -> BytesIO:
     fig = plt.figure(figsize=(5, 5))
-    colors = ("green", "red")
-    wp = {"linewidth": 1, "edgecolor": "black"}
     tags = data["Predicted sentiment"].value_counts()
-    explode = (0.01, 0.01)
 
     tags.plot(
         kind="pie",
         autopct="%1.1f%%",
-        shadow=True, 
-        colors=colors, 
-        startangle=90, 
-        wedgeprops=wp,
-        explode=explode,
-        title= "Sentiment Distribution", 
+        shadow=True,
+        startangle=90,
+        title="Sentiment Distribution",
         xlabel="",
         ylabel="",
     )
 
     graph = BytesIO()
-    plt.savefig(graph, format="png")
-    plt.close()
-
+    plt.savefig(graph, format="png", bbox_inches="tight")
+    plt.close(fig)
+    graph.seek(0)
     return graph
 
-def sentiment_mapping(x): 
-    if x==1:
-        return "Positive"
-    else: 
-        return "Negative"
+
+def sentiment_mapping(x: int) -> str:
+    return "Positive" if x == 1 else "Negative"
+
 
 if __name__ == "__main__":
-    app.run(port=5000, debug = True)
+    app.run(host="127.0.0.1", port=5000, debug=True)

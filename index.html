@@ -1,102 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon review sentiment analysis</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amazon review sentiment analysis</title>
 </head>
 
 <body>
-    <h1>Predicting text sentiment</h1>
+  <h1>Predicting text sentiment</h1>
 
-    <form id="predictionForm">
-        <input type="file" id="csvFileInput" accept=".csv">
-        <textarea id="textInput" placeholder="Enter text..."></textarea>
-        <button type="button" onclick="predict()">Predict</button>
-        <button id="downloadBtn" style="display:none" onclick="downloadPredictions()">Download Predictions</button>
-    </form>
+  <form id="predictionForm" onsubmit="return false;">
+    <input type="file" id="csvFileInput" accept=".csv" />
+    <textarea id="textInput" placeholder="Enter text..."></textarea>
 
-    <div id="predictionResult"></div>
-    <div id="graphContainer"></div>
+    <button type="button" id="predictBtn">Predict</button>
+    <button type="button" id="downloadBtn" style="display:none;">Download Predictions</button>
+  </form>
 
-    <script>
-        function predict() {
-            // Check if CSV file is present
-            var csvFileInput = document.getElementById("csvFileInput");
-            var textInput = document.getElementById("textInput");
-            var predictionResult = document.getElementById("predictionResult");
-            var graphContainer = document.getElementById("graphContainer");
+  <div id="predictionResult"></div>
+  <div id="graphContainer"></div>
 
-            if (csvFileInput.files.length > 0) {
-                // Upload CSV file
-                var formData = new FormData();
-                formData.append("file", csvFileInput.files[0]);
+  <script>
+    const API = "http://127.0.0.1:5000";
 
-                fetch("http://localhost:5000/predict", {
-                    method: "POST",
-                    body: formData
-                })
-                    .then(response => {
-                        if (response.headers.get('X-Graph-Exists') === 'true') {
-                            console.log("Graph")
-                            var graphData = response.headers.get('X-Graph-Data');
-                            displayGraph(graphData);
-                        }
+    document.getElementById("predictBtn").addEventListener("click", predict);
 
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        console.log("Blob:", blob);
+    async function predict() {
+      const csvFileInput = document.getElementById("csvFileInput");
+      const textInput = document.getElementById("textInput");
+      const predictionResult = document.getElementById("predictionResult");
+      const graphContainer = document.getElementById("graphContainer");
+      const downloadBtn = document.getElementById("downloadBtn");
 
-                        document.getElementById("downloadBtn").style.display = "block";
-                        document.getElementById("downloadBtn").onclick = function () {
-                            console.log("Downloading...");
-                            var url = URL.createObjectURL(blob);
-                            console.log("URL:", url);
+      predictionResult.textContent = "";
+      graphContainer.innerHTML = "";
+      downloadBtn.style.display = "none";
+      downloadBtn.onclick = null;
 
-                            var a = document.createElement("a");
-                            a.href = url;
-                            a.download = "Predictions.csv";
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        };
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+      try {
+        if (csvFileInput.files.length > 0) {
+          const formData = new FormData();
+          formData.append("file", csvFileInput.files[0]);
 
-            } else if (textInput.value.trim() !== "") {
-                // Predict on single sentence
-                fetch("http://localhost:5000/predict", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ "text": textInput.value.trim() })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data)
-                        predictionResult.innerHTML = "Predicted sentiment: " + data.prediction;
-                    });
-            }
+          const res = await fetch(`${API}/predict`, { method: "POST", body: formData });
+
+          if (!res.ok) throw new Error(await res.text());
+
+          if (res.headers.get("X-Graph-Exists") === "true") {
+            const graphData = res.headers.get("X-Graph-Data");
+            if (graphData) displayGraph(graphData);
+          }
+
+          const blob = await res.blob();
+
+          downloadBtn.style.display = "inline-block";
+          downloadBtn.onclick = function () {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "Predictions.csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          };
+
+          predictionResult.textContent = "Bulk prediction ready. Download the CSV.";
+
+        } else if (textInput.value.trim() !== "") {
+          const res = await fetch(`${API}/predict`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: textInput.value.trim() })
+          });
+
+          const bodyText = await res.text();
+          if (!res.ok) throw new Error(bodyText);
+
+          const data = JSON.parse(bodyText);
+          predictionResult.textContent = "Predicted sentiment: " + data.prediction;
+
+        } else {
+          predictionResult.textContent = "Please upload a CSV or enter text.";
         }
+      } catch (err) {
+        console.error(err);
+        predictionResult.textContent = "Error: " + err.message;
+      }
+    }
 
-        function downloadPredictions() {
-            console.log("Download predictions")
-        }
-
-        function displayGraph(graphData) {
-            var graphUrl = "data:image/png;base64," + graphData;
-            var img = document.createElement('img');
-            img.src = graphUrl;
-            graphContainer.appendChild(img);
-        }
-    </script>
-
+    function displayGraph(graphData) {
+      const graphContainer = document.getElementById("graphContainer");
+      graphContainer.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = "data:image/png;base64," + graphData;
+      graphContainer.appendChild(img);
+    }
+  </script>
 </body>
-
 </html>
