@@ -4,7 +4,7 @@ from io import BytesIO
 
 # nltk.cropus import stopwords
 from nltk.stem.porter import PorterStemmer
-import matplotlib.pyplot as ply
+import matplotlib.pyplot as plt
 import pandas as pd
 import pickle 
 import base64
@@ -61,6 +61,7 @@ def predict():
         return jsonify({"error": str(e)})
     
 
+# Single Prediction: 
 def single_prediction(predictor, scaler, cv, text_input):
     corpus = []
     stemmer = PorterStemmer()
@@ -77,6 +78,7 @@ def single_prediction(predictor, scaler, cv, text_input):
 
     return "Positive" if y_predictions ==1 else  "Negative"
 
+# BULK Prediction 
 def bulk_prediction(predictor, scaler, cv, data):
     def bulk_prediction(predictor, scaler, cv, data):
         corpus = []
@@ -105,3 +107,37 @@ def bulk_prediction(predictor, scaler, cv, data):
     return predictions_csv, graph
 
 
+def get_distribution_graph(data) :
+    fig = plt.figure(figsize=(5, 5))
+    colors = ("green", "red")
+    wp = {"Linewidth": 1, "edgecolor": "black"}
+    tags = data[ "Predicted sentiment"]. value_counts ()
+    explode = (0.01, 0.01)
+
+    tags.plot(
+        kind="pie",
+        autopct="%1.1f%%",
+        shadow=True, 
+        colors=colors, 
+        startangle=90, 
+        wedgeprops=wp,
+        explode=explode,
+        title= "Sentiment Distribution", 
+        xlabel=""
+        ylabel="",
+    )
+
+    graph = BytesIO()
+    plt.savefig(graph, format="png")
+    plt.close()
+
+    return graph
+
+def sentiment_mapping(x): 
+    if x==1:
+        return "Positive"
+    else: 
+        return "Negative"
+
+if __name__ == "__main__":
+    app.run(port=5000, debug = True)
