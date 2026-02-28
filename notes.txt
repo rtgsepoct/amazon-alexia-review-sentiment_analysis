@@ -1,0 +1,10 @@
+If you need to delete the latest push:
+
+- git reset --hard HEAD~1
+Move your branch back by one commit. This deletes the last commit locally:
+  
+- git push --force-with-lease origin main
+Update GitHub to match (delete the pushed commit). This removes the commit from the remote:
+
+- git log --oneline -3
+Verify that the commit is gone:
