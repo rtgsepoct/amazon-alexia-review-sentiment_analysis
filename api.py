@@ -85,9 +85,24 @@ def single_prediction(predictor, scaler, cv, text_input: str) -> str:
     corpus = [clean_text(text_input)]
     X = cv.transform(corpus).toarray()
     X_scl = scaler.transform(X)
+
+    print("DEBUG text:", text_input)
+    print("DEBUG cleaned:", corpus[0])
+    print("DEBUG nonzero features:", int((X != 0).sum()), "of", X.size)
+
+    X_scl = scaler.transform(X)
+
     proba = predictor.predict_proba(X_scl)
-    pred_class = int(proba.argmax(axis=1)[0])
+    #pred_class = int(proba.argmax(axis=1)[0])
+    pred_class = int(predictor.predict(X_scl)[0])
+    
+    #return "Positive Sentiment" if pred_class == 1 else "Negative Sentiment"
+    print("classes_:", getattr(predictor, "classes_", None))
+    print("Nonzero features:", (X != 0).sum(), "out of", X.size)
+
     return "Positive Sentiment" if pred_class == 1 else "Negative Sentiment"
+
+
 
 
 def bulk_prediction(predictor, scaler, cv, data: pd.DataFrame):
