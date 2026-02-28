@@ -2,29 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amazon review sentiment analysis</title>
+  <title>Amazon Review Sentiment</title>
 </head>
-
 <body>
   <h1>Predicting text sentiment</h1>
 
-  <form id="predictionForm" onsubmit="return false;">
-    <input type="file" id="csvFileInput" accept=".csv" />
+  <form onsubmit="return false;">
+    <input type="file" id="csvFileInput" accept=".csv">
     <textarea id="textInput" placeholder="Enter text..."></textarea>
 
-    <button type="button" id="predictBtn">Predict</button>
-    <button type="button" id="downloadBtn" style="display:none;">Download Predictions</button>
+    <button type="button" id="predictBtn">Predict</button> <!-- ✅ CHANGED -->
+    <button type="button" id="downloadBtn" style="display:none;">Download Predictions</button> <!-- ✅ CHANGED -->
   </form>
 
   <div id="predictionResult"></div>
   <div id="graphContainer"></div>
 
   <script>
-    const API = "http://127.0.0.1:5000";
+    const API = "http://127.0.0.1:5000"; // ✅ CHANGED
 
-    document.getElementById("predictBtn").addEventListener("click", predict);
+    document.getElementById("predictBtn").addEventListener("click", predict); // ✅ ADDED
 
     async function predict() {
       const csvFileInput = document.getElementById("csvFileInput");
@@ -44,18 +42,17 @@
           formData.append("file", csvFileInput.files[0]);
 
           const res = await fetch(`${API}/predict`, { method: "POST", body: formData });
+          const blob = await res.blob();
 
-          if (!res.ok) throw new Error(await res.text());
+          if (!res.ok) throw new Error(await blob.text());
 
           if (res.headers.get("X-Graph-Exists") === "true") {
             const graphData = res.headers.get("X-Graph-Data");
             if (graphData) displayGraph(graphData);
           }
 
-          const blob = await res.blob();
-
           downloadBtn.style.display = "inline-block";
-          downloadBtn.onclick = function () {
+          downloadBtn.onclick = () => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
@@ -66,7 +63,7 @@
             URL.revokeObjectURL(url);
           };
 
-          predictionResult.textContent = "Bulk prediction ready. Download the CSV.";
+          predictionResult.textContent = "Bulk prediction ready. Download CSV.";
 
         } else if (textInput.value.trim() !== "") {
           const res = await fetch(`${API}/predict`, {
@@ -75,18 +72,18 @@
             body: JSON.stringify({ text: textInput.value.trim() })
           });
 
-          const bodyText = await res.text();
-          if (!res.ok) throw new Error(bodyText);
+          const t = await res.text();
+          if (!res.ok) throw new Error(t);
 
-          const data = JSON.parse(bodyText);
+          const data = JSON.parse(t);
           predictionResult.textContent = "Predicted sentiment: " + data.prediction;
 
         } else {
           predictionResult.textContent = "Please upload a CSV or enter text.";
         }
-      } catch (err) {
-        console.error(err);
-        predictionResult.textContent = "Error: " + err.message;
+      } catch (e) {
+        predictionResult.textContent = "Error: " + e.message;
+        console.error(e);
       }
     }
 
