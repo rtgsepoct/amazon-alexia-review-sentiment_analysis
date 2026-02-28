@@ -54,6 +54,7 @@ You can use this data to analyze Amazon’s Alexa product ; discover insights in
     from sklearn.model_selection import train_test_split
     from sklearn.feature_extraction.text import CountVectorizer 
     from sklearn.preprocessing import MinMaxScaler
+
     from sklearn.model_selection import cross_val_score
     from sklearn.ensemble import RandomForestClassifier
     
@@ -72,3 +73,6 @@ You can use this data to analyze Amazon’s Alexa product ; discover insights in
     - K-fold cross validation + Applying grid search to get the optimal parameters on random forest
     - XGBoost (best one)
     - Decision Tree Classifier 
+
+![Screenshot 2026-02-28 at 11 39 07 PM](https://github.com/user-attachments/assets/ae5ac6db-8c74-4d17-8d3c-503cc81de3c2)
+
