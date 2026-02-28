@@ -28,9 +28,9 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     # Select the predictor to be loaded from Models folder
-    predictor = pickle.load(open(r"Models/model_xgb.pkl", "rb"))
-    scaler = pickle.load(open(r"Models/scaler.pkl", "rb"))
-    cv = pickle.load(open(r"Models/countVectorizer.pkl", "rb"))
+    predictor = pickle.load(open(r"./model_xgb.pkl", "rb"))
+    scaler = pickle.load(open(r"./scaler.pkl", "rb"))
+    cv = pickle.load(open(r"./countVectorizer.pkl", "rb"))
     try:
         # Check if the request contains a file (for bulk prediction) or text input
         if "file" in request.files:

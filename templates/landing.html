@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/gh/creativetimofficial/tailwind-starter-kit/compiled-tailwind.min.css" />
-  <title>Amazon Alexa Reviews Analysis</title>
+  <title>Amazon Alexa Echo White Reviews Analysis</title>
 </head>
 
 <body class="text-gray-800 antialiased">
@@ -19,7 +19,7 @@
   <main>
     <div class="relative pt-16 pb-32 flex content-center items-center justify-center" style="min-height: 75vh;">
       <div class="absolute top-0 w-full h-full bg-center bg-cover"
-        style='background-image: linear-gradient(90deg, rgba(17,223,169,1) 0%, rgba(3,60,88,1) 49%, rgba(10,32,50,1) 100%);'>
+        style='background-image: linear-gradient(90deg, rgb(224, 86, 26) 0%, rgb(89, 51, 206) 49%, rgb(160, 209, 44) 100%);'>
         <span id="blackOverlay" class="w-full h-full absolute opacity-50 bg-black"></span>
       </div>
       <div class="container relative mx-auto">
@@ -27,12 +27,11 @@
           <div class="w-full lg:w-6/12 px-4 ml-auto mr-auto text-center">
             <div class="pr-12">
               <h1 class="text-white font-semibold text-5xl">
-                Understand the emotions behind the words.😊
+                Understanding user's expression and emotions behind the those reviews.😊
               </h1>
               <p class="mt-4 text-lg text-gray-300">
-                Text sentiment prediction is a powerful tool that can help you to understand the emotions and opinions
-                expressed in your text data.
-                This information can be used to improve your business in a number of ways
+                Sentiment analysis is the process of analyzing digital text to determine if the emotional tone of the message is positive, negative, or neutral. 
+                Here, I will be categorizing each review with the type Echo model based on its variation and analyzing the top 2 positively rated models by conducting sentiment analysis. 
               </p>
             </div>
           </div>
@@ -56,7 +55,7 @@
         </svg>
       </div>
       <div class="flex flex-col items-center justify-center">
-        <h1 class="text-5xl font-semibold  py-2 ">Text Sentiment Prediction</h1>
+        <h1 class="text-5xl font-semibold  py-2 ">Amazon Review Sentiment Prediction</h1>
       </div>
       <div class="container mx-auto px-4 py-24">
 
@@ -82,7 +81,7 @@
                             </div>
 
                             <div class="py-1">
-                              <span class="px-1 text-sm text-gray-600">Text for Prediction</span>
+                              <span class="px-1 text-sm text-gray-600">Fill your for prediction</span>
                               <textarea
                                 class="text-md block px-3 py-2 rounded-lg w-full 
                                 bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none"
@@ -110,14 +109,14 @@
           </div>
           <div class="w-full md:w-4/12 ml-auto mr-auto px-4">
             <div>
-              <h1 class="text-4xl underline underline-offset-8  ">Prediction Result</h1>
+              <h1 class="text-4xl underline underline-offset-8  ">Prediction result (positive or negative)</h1>
               <div class="p-4 m-2 border">
                 <div id="predictionResult"></div>
 
               </div>
             </div>
             <div class="pt-6">
-              <h1 class="text-4xl underline underline-offset-8  ">graph Result</h1>
+              <h1 class="text-4xl underline underline-offset-8  ">Graph result</h1>
               <div class="p-4 m-2 border  ">
                 <div id="graphContainer"></div>
               </div>
@@ -150,7 +149,7 @@
       <div class="flex flex-wrap items-center md:justify-between justify-center">
         <div class="w-full md:w-4/12 px-4 mx-auto text-center">
           <div class="text-sm text-white font-semibold py-1">
-            Copyright © Text sentiment prediction
+            Copyright © Amazon Echo White text sentiment prediction
 
           </div>
         </div>
@@ -171,7 +170,7 @@
       var formData = new FormData();
       formData.append("file", csvFileInput.files[0]);
 
-      fetch("http://localhost:5000/predict", {
+      fetch("/predict", {
         method: "POST",
         body: formData
       })
@@ -207,7 +206,7 @@
 
     } else if (textInput.value.trim() !== "") {
       // Predict on single sentence
-      fetch("http://localhost:5000/predict", {
+      fetch("/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
