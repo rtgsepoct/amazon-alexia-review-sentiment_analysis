@@ -1,57 +1,130 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/creativetimofficial/tailwind-starter-kit/compiled-tailwind.min.css" />
-  <title>Amazon Alexa Review Analysis</title>
+  <meta name="theme-color" content="#000000" />
+  <link rel="shortcut icon" href="./assets/img/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/apple-icon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/creativetimofficial/tailwind-starter-kit/compiled-tailwind.min.css" />
+  <title>Amazon Alexa Reviews Analysis</title>
 </head>
 
 <body class="text-gray-800 antialiased">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
+
   <main>
-    <section class="py-20">
-      <div class="container mx-auto px-4 py-8">
+    <div class="relative pt-16 pb-32 flex content-center items-center justify-center" style="min-height: 75vh;">
+      <div class="absolute top-0 w-full h-full bg-center bg-cover"
+        style='background-image: linear-gradient(90deg, rgba(17,223,169,1) 0%, rgba(3,60,88,1) 49%, rgba(10,32,50,1) 100%);'>
+        <span id="blackOverlay" class="w-full h-full absolute opacity-50 bg-black"></span>
+      </div>
+      <div class="container relative mx-auto">
         <div class="items-center flex flex-wrap">
+          <div class="w-full lg:w-6/12 px-4 ml-auto mr-auto text-center">
+            <div class="pr-12">
+              <h1 class="text-white font-semibold text-5xl">
+                Understand the emotions behind the words.😊
+              </h1>
+              <p class="mt-4 text-lg text-gray-300">
+                Text sentiment prediction is a powerful tool that can help you to understand the emotions and opinions
+                expressed in your text data.
+                This information can be used to improve your business in a number of ways
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="top-auto bottom-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden"
+        style="height: 70px;">
+        <svg class="absolute bottom-0 overflow-hidden" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          version="1.1" viewBox="0 0 2560 100" x="0" y="0">
+          <polygon class="text-gray-300 fill-current" points="2560 0 2560 100 0 100"></polygon>
+        </svg>
+      </div>
+    </div>
 
+    <section class="relative py-20">
+      <div class="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20"
+        style="height: 80px;">
+        <svg class="absolute bottom-0 overflow-hidden" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          version="1.1" viewBox="0 0 2560 100" x="0" y="0">
+          <polygon class="text-white fill-current" points="2560 0 2560 100 0 100"></polygon>
+        </svg>
+      </div>
+      <div class="flex flex-col items-center justify-center">
+        <h1 class="text-5xl font-semibold  py-2 ">Text Sentiment Prediction</h1>
+      </div>
+      <div class="container mx-auto px-4 py-24">
+
+        <div class="items-center flex flex-wrap">
           <div class="w-full md:w-4/12 ml-auto mr-auto px-4">
-            <!-- ✅ CHANGED: ONLY ONE FORM (no nesting), no duplicate ids -->
-            <form id="predictionForm" onsubmit="return false;">
-              <div class="mx-auto max-w-lg">
-                <div class="py-2">
-                  <span class="px-1 text-sm text-gray-600">Upload your CSV file</span>
-                  <input type="file" id="csvFileInput" accept=".csv"
-                    class="text-md block px-3 py-2 rounded-lg w-full bg-white border-2 border-gray-300 shadow-md">
-                </div>
+            <form id="predictionForm">
 
-                <div class="py-2">
-                  <span class="px-1 text-sm text-gray-600">Text for Prediction</span>
-                  <textarea id="textInput" placeholder="Enter text..."
-                    class="text-md block px-3 py-2 rounded-lg w-full bg-white border-2 border-gray-300 shadow-md"></textarea>
-                </div>
 
-                <!-- ✅ CHANGED: no inline onclick; attach listener in JS -->
-                <button type="button" id="predictBtn"
-                  class="mt-3 text-lg font-semibold bg-gray-800 w-full text-white rounded-lg px-6 py-3 shadow-xl hover:bg-black">
-                  Predict
-                </button>
+
+
+              <div class="container max-w-full mx-auto md:py-24 px-6">
+                <div class="max-w-sm mx-auto px-6">
+                  <div class="relative flex flex-wrap">
+                    <div class="w-full relative">
+                      <div class="md:mt-6">
+                        <form class="mt-8" id="predictionForm">
+                          <div class="mx-auto max-w-lg ">
+                            <div class="py-1">
+                              <span class="px-1 text-sm text-gray-600">Upload your CSV file</span>
+                              <input placeholder="" type="file" id="csvFileInput" accept=".csv"
+                                class="text-md block px-3 py-2 rounded-lg w-full
+                                   bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none">
+                            </div>
+
+                            <div class="py-1">
+                              <span class="px-1 text-sm text-gray-600">Text for Prediction</span>
+                              <textarea
+                                class="text-md block px-3 py-2 rounded-lg w-full 
+                                bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none"
+                                id="textInput" placeholder="Enter text..."></textarea>
+
+                            </div>
+
+                            <button type="button" onclick="predict()" class="mt-3 text-lg font-semibold
+                                                            bg-gray-800 w-full text-white rounded-lg
+                                                     px-6 py-3 block shadow-xl hover:text-white hover:bg-black">
+                              Predict
+                            </button>
+
+                          </div>
+                        </form>
+
+
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           </div>
-
           <div class="w-full md:w-4/12 ml-auto mr-auto px-4">
-            <h1 class="text-2xl font-semibold">Prediction Result</h1>
-            <div class="p-4 m-2 border">
-              <div id="predictionResult"></div>
-            </div>
+            <div>
+              <h1 class="text-4xl underline underline-offset-8  ">Prediction Result</h1>
+              <div class="p-4 m-2 border">
+                <div id="predictionResult"></div>
 
-            <h1 class="text-2xl font-semibold mt-6">Graph Result</h1>
-            <div class="p-4 m-2 border">
-              <div id="graphContainer"></div>
+              </div>
             </div>
-
-            <!-- ✅ CHANGED: type="button" -->
-            <button id="downloadBtn" type="button" style="display:none"
-              class="text-lg font-semibold bg-gray-800 w-full text-white rounded-lg px-6 py-3 mt-6 shadow-xl hover:bg-black">
+            <div class="pt-6">
+              <h1 class="text-4xl underline underline-offset-8  ">graph Result</h1>
+              <div class="p-4 m-2 border  ">
+                <div id="graphContainer"></div>
+              </div>
+            </div>
+            <button id="downloadBtn" style="display:none" onclick="downloadPredictions()" class="mt-3 text-lg font-semibold
+            bg-gray-800 w-full text-white rounded-lg
+     px-6 py-3 mt-10 block shadow-xl hover:text-white hover:bg-black">
               Download Predictions
             </button>
           </div>
@@ -59,87 +132,107 @@
         </div>
       </div>
     </section>
+
+
+
   </main>
+  <footer class="relative bg-gray-900 pt-8 pb-6">
+    <div class="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20"
+      style="height: 80px;">
+      <svg class="absolute bottom-0 overflow-hidden" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+        version="1.1" viewBox="0 0 2560 100" x="0" y="0">
+        <polygon class="text-gray-300 fill-current" points="2560 0 2560 100 0 100"></polygon>
+      </svg>
+    </div>
+    <div class="container mx-auto px-4">
 
-  <script>
-    const API = "http://127.0.0.1:5000"; // ✅ CHANGED: correct backend port
+      <hr class="my-6 border-gray-400" />
+      <div class="flex flex-wrap items-center md:justify-between justify-center">
+        <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+          <div class="text-sm text-white font-semibold py-1">
+            Copyright © Text sentiment prediction
 
-    document.getElementById("predictBtn").addEventListener("click", predict); // ✅ ADDED
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+<script>
+  function predict() {
+    // Check if CSV file is present
+    var csvFileInput = document.getElementById("csvFileInput");
+    var textInput = document.getElementById("textInput");
+    var predictionResult = document.getElementById("predictionResult");
+    var graphContainer = document.getElementById("graphContainer");
 
-    async function predict() {
-      const csvFileInput = document.getElementById("csvFileInput");
-      const textInput = document.getElementById("textInput");
-      const predictionResult = document.getElementById("predictionResult");
-      const graphContainer = document.getElementById("graphContainer");
-      const downloadBtn = document.getElementById("downloadBtn");
+    if (csvFileInput.files.length > 0) {
+      // Upload CSV file
+      var formData = new FormData();
+      formData.append("file", csvFileInput.files[0]);
 
-      predictionResult.textContent = "";
-      graphContainer.innerHTML = ""; // ✅ ADDED: clear old graph
-      downloadBtn.style.display = "none";
-      downloadBtn.onclick = null;
-
-      try {
-        if (csvFileInput.files.length > 0) {
-          const formData = new FormData();
-          formData.append("file", csvFileInput.files[0]);
-
-          const res = await fetch(`${API}/predict`, { method: "POST", body: formData });
-          const bodyBlob = await res.blob();
-
-          if (!res.ok) {
-            const errText = await bodyBlob.text();
-            throw new Error(errText);
+      fetch("http://localhost:5000/predict", {
+        method: "POST",
+        body: formData
+      })
+        .then(response => {
+          if (response.headers.get('X-Graph-Exists') === 'true') {
+            console.log("Graph")
+            var graphData = response.headers.get('X-Graph-Data');
+            displayGraph(graphData);
           }
 
-          // ✅ CHANGED: read graph headers
-          if (res.headers.get("X-Graph-Exists") === "true") {
-            const graphData = res.headers.get("X-Graph-Data");
-            if (graphData) displayGraph(graphData);
-          }
+          return response.blob();
+        })
+        .then(blob => {
+          console.log("Blob:", blob);
 
-          downloadBtn.style.display = "block";
-          downloadBtn.onclick = function () {
-            const url = URL.createObjectURL(bodyBlob);
-            const a = document.createElement("a");
+          document.getElementById("downloadBtn").style.display = "block";
+          document.getElementById("downloadBtn").onclick = function () {
+            console.log("Downloading...");
+            var url = URL.createObjectURL(blob);
+            console.log("URL:", url);
+
+            var a = document.createElement("a");
             a.href = url;
             a.download = "Predictions.csv";
             document.body.appendChild(a);
             a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
           };
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
 
-          predictionResult.textContent = "Bulk prediction complete. Download ready.";
-
-        } else if (textInput.value.trim() !== "") {
-          const res = await fetch(`${API}/predict`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: textInput.value.trim() })
-          });
-
-          const text = await res.text(); // ✅ ADDED: better error visibility
-          if (!res.ok) throw new Error(text);
-
-          const data = JSON.parse(text);
-          predictionResult.textContent = "Predicted sentiment: " + data.prediction;
-
-        } else {
-          predictionResult.textContent = "Please upload a CSV or enter text.";
-        }
-      } catch (err) {
-        predictionResult.textContent = "Error: " + err.message; // ✅ ADDED
-        console.error(err);
-      }
+    } else if (textInput.value.trim() !== "") {
+      // Predict on single sentence
+      fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ "text": textInput.value.trim() })
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          predictionResult.innerHTML = "Predicted sentiment: " + data.prediction;
+        });
     }
+  }
 
-    function displayGraph(graphData) {
-      const graphContainer = document.getElementById("graphContainer");
-      graphContainer.innerHTML = "";
-      const img = document.createElement("img");
-      img.src = "data:image/png;base64," + graphData;
-      graphContainer.appendChild(img);
-    }
-  </script>
-</body>
+  function downloadPredictions() {
+    console.log("Download prediction")
+  }
+
+  function displayGraph(graphData) {
+    predictionResult.innerHTML = "";
+    var graphUrl = "data:image/png;base64," + graphData;
+    var img = document.createElement('img');
+    img.src = graphUrl;
+    graphContainer.appendChild(img);
+  }
+</script>
+
 </html>
